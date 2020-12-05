@@ -7,3 +7,4 @@ username:passwd
 username:passwd
 username:passwd
 ```
+it will check if accounts are preminum or not
